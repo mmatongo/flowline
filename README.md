@@ -78,7 +78,7 @@ Flags:
 
 Before you can use Flowline to migrate your knowledge base, you need to export your knowledge base from Confluence. You can do this by following the instructions [here](https://confluence.atlassian.com/doc/export-content-to-word-pdf-html-and-xml-139475.html) to export your knowledge base to HTML.
 
-You then need to craete a collection in Outline where you want to import your knowledge base. You can do this by following the instructions [here](https://help.getoutline.com/article/13-creating-collections).
+You then need to craete a collection in Outline where you want to import your knowledge base. You can do this by following the instructions [here](https://docs.getoutline.com/s/guide/doc/collections-l9o3LD22sV).
 
 Then create an API key in Outline. You can do this by going to your settings then to the API section.
 ```bash
