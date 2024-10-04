@@ -85,7 +85,6 @@ Then create an API key in Outline. You can do this by going to your settings the
 # Get a list of all the collections
 flowline outline -G
 
-flowline outline -G
 [
   {
     "name": "Wiki",
@@ -95,7 +94,7 @@ flowline outline -G
   {
     "name": "Welcome",
     "id": "daf00c41-05c8-403f-a665-2a27b736c5cb",
-    "url": "https://wiki.exxample.rest/api/collection/welcome-SH4HCAvCWl"
+    "url": "https://wiki.example.com/api/collection/welcome-SH4HCAvCWl"
   }
 ]
 ```
