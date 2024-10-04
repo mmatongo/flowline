@@ -46,6 +46,11 @@ func createAttachment(filePath string, a *logger.App) (map[string]interface{}, e
 	fileSize := fileInfo.Size()
 	mimeType := utils.GetMimeType(filePath)
 
+	if mimeType == "" {
+		a.Logger.Errorf("cannot determine mimetype of %v, skipping...", filePath)
+		return nil, nil
+	}
+
 	payload := AttachmentPayload{
 		Name:        fileName,
 		ContentType: mimeType,
@@ -155,8 +160,6 @@ func createAttachment(filePath string, a *logger.App) (map[string]interface{}, e
 		return nil, fmt.Errorf("failed to upload attachment: %s - %s", uploadResp.Status, string(uploadBodyBytes))
 	}
 
-	a.Print("Successfully uploaded attachment: ", fileName)
-
 	return map[string]interface{}{
 		"id":   data["attachment"].(map[string]interface{})["id"],
 		"key":  form["key"],
@@ -187,7 +190,7 @@ func uploadAndReplaceAttachments(htmlContent, basePath string, a *logger.App) (s
 			if _, err := os.Stat(srcPath); err == nil {
 				attachment, err := createAttachment(srcPath, a)
 				if err != nil {
-					a.Logger.Printf("failed to upload attachment %s. error: %v\n", srcPath, err)
+					a.Logger.Printf("failed to upload attachment %s. error: %v", srcPath, err)
 					return
 				}
 
@@ -196,21 +199,22 @@ func uploadAndReplaceAttachments(htmlContent, basePath string, a *logger.App) (s
 					if attachmentURL != "" {
 						s.SetAttr(attr, attachmentURL)
 					} else {
-						a.Logger.Printf("failed to get URL for attachment %s. keeping original reference.\n", srcPath)
+						a.Logger.Printf("failed to get URL for attachment %s. keeping original reference.", srcPath)
 					}
 				}
 			} else {
-				a.Logger.Printf("attachment file not found: %s\n", srcPath)
+				a.Logger.Printf("attachment file not found: %s", srcPath)
 			}
 		}
 	}
 
-	/*
-		i couldn't find any actual img tags that weren't confluenc's own so this is best left commented out
-		doc.Find("img").Each(func(i int, s *goquery.Selection) {
+	doc.Find("img").Each(func(i int, s *goquery.Selection) {
+		if s.HasClass("emoticon") {
+			s.Remove()
+		} else {
 			processElement(s, "src")
-		})
-	*/
+		}
+	})
 
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		processElement(s, "href")

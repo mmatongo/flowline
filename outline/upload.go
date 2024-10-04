@@ -13,13 +13,13 @@ import (
 func PrepareAndProcess(inputPath, outputPath, collectionID string, verify bool, a *logger.App) error {
 	// bleh
 	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
-		a.Logger.Errorf("failed to create output directory: %v\n", err)
+		a.Logger.Errorf("failed to create output directory: %v", err)
 		return err
 	}
 
 	files, err := os.ReadDir(inputPath)
 	if err != nil {
-		a.Logger.Errorf("failed to read input directory: %v\n", err)
+		a.Logger.Errorf("failed to read input directory: %v", err)
 		return err
 	}
 
@@ -29,7 +29,7 @@ func PrepareAndProcess(inputPath, outputPath, collectionID string, verify bool, 
 			output := filepath.Join(outputPath, strings.TrimSuffix(file.Name(), ".html")+".md")
 
 			if err := processAndUploadFile(input, output, collectionID, verify, a); err != nil {
-				a.Logger.Errorf("error processing file %s: %v\n", file.Name(), err)
+				a.Logger.Errorf("error processing file %s: %v", file.Name(), err)
 			}
 		}
 	}
@@ -79,7 +79,7 @@ func processAndUploadFile(inputPath, outputPath, collectionID string, verify boo
 		return fmt.Errorf("invalid document Id")
 	}
 
-	a.Logger.Printf("successfully created document: %s with Id: %s\n", title, documentID)
+	a.Logger.Printf("successfully created document: %s with Id: %s", title, documentID)
 
 	if err := os.WriteFile(outputPath, []byte(markdownContent), 0644); err != nil {
 		return err
