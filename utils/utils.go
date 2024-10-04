@@ -16,7 +16,8 @@ func GetMimeType(filePath string) string {
 	ext := filepath.Ext(filePath)
 	mimeType := mime.TypeByExtension(ext)
 	if mimeType == "" {
-		mimeType = "application/octet-stream"
+		// maybe we should return an error in the future
+		return ""
 	}
 	return mimeType
 }
