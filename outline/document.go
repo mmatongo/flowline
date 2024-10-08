@@ -12,22 +12,24 @@ import (
 )
 
 type DocumentPayload struct {
-	Title        string `json:"title"`
-	Text         string `json:"text"`
-	CollectionId string `json:"collectionId"`
-	Publish      bool   `json:"publish"`
+	Title            string `json:"title"`
+	Text             string `json:"text"`
+	CollectionId     string `json:"collectionId"`
+	Publish          bool   `json:"publish"`
+	ParentDocumentId string `json:"parentDocumentId,omitempty"`
 }
 
-func createDocument(title, text, collectionID string, a *logger.App) (map[string]interface{}, error) {
+func createDocument(title, text, collectionID, parentDocumentID string, a *logger.App) (map[string]interface{}, error) {
 	cfg := config.NewConfig()
 	rate.LimitRequest(a)
 	url := fmt.Sprintf("%s/documents.create", cfg.BaseURL)
 
 	payload := DocumentPayload{
-		Title:        title,
-		Text:         text,
-		CollectionId: collectionID,
-		Publish:      true,
+		Title:            title,
+		Text:             text,
+		CollectionId:     collectionID,
+		Publish:          true,
+		ParentDocumentId: parentDocumentID,
 	}
 
 	payloadBytes, err := json.Marshal(payload)
