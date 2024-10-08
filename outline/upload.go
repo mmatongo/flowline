@@ -8,49 +8,63 @@ import (
 
 	"github.com/mmatongo/flowline/convert"
 	"github.com/mmatongo/flowline/pkg/logger"
+	"golang.org/x/net/html"
 )
 
 func PrepareAndProcess(inputPath, outputPath, collectionID string, verify bool, a *logger.App) error {
-	// bleh
 	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
 		a.Logger.Errorf("failed to create output directory: %v", err)
 		return err
 	}
 
-	files, err := os.ReadDir(inputPath)
+	htmlContent, err := os.ReadFile(filepath.Join(inputPath, "index.html"))
 	if err != nil {
-		a.Logger.Errorf("failed to read input directory: %v", err)
+		a.Logger.Errorf("failed to read index.html: %v", err)
 		return err
 	}
 
-	for _, file := range files {
-		if filepath.Ext(file.Name()) == ".html" {
-			input := filepath.Join(inputPath, file.Name())
-			output := filepath.Join(outputPath, strings.TrimSuffix(file.Name(), ".html")+".md")
+	doc, err := html.Parse(strings.NewReader(string(htmlContent)))
+	if err != nil {
+		a.Logger.Errorf("failed to parse HTML: %v", err)
+		return err
+	}
 
-			if err := processAndUploadFile(input, output, collectionID, verify, a); err != nil {
-				a.Logger.Errorf("error processing file %s: %v", file.Name(), err)
+	pages := ProcessHTML(doc)
+	return processPages(pages, inputPath, outputPath, collectionID, verify, a, "")
+}
+
+func processPages(pages []*Page, inputPath, outputPath, collectionID string, verify bool, a *logger.App, parentID string) error {
+	for _, page := range pages {
+		documentID, err := processAndUploadFile(page.Title, filepath.Join(inputPath, page.URL), outputPath, collectionID, verify, a, parentID)
+		if err != nil {
+			a.Logger.Errorf("error processing file %s: %v", page.URL, err)
+			continue
+		}
+
+		if len(page.Children) > 0 {
+			err = processPages(page.Children, inputPath, outputPath, collectionID, verify, a, documentID)
+			if err != nil {
+				a.Logger.Errorf("error processing children of %s: %v", page.Title, err)
 			}
 		}
 	}
-
 	return nil
 }
 
-func processAndUploadFile(inputPath, outputPath, collectionID string, verify bool, a *logger.App) error {
+func processAndUploadFile(title, inputPath, outputPath, collectionID string, verify bool, a *logger.App, parentID string) (string, error) {
 	htmlContent, err := os.ReadFile(inputPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	processedHTML, err := uploadAndReplaceAttachments(string(htmlContent), filepath.Dir(inputPath), a)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	title, markdownContent, err := convert.ConvertHTMLToMarkdown(processedHTML, a)
+	_, markdownContent, err := convert.ConvertHTMLToMarkdown(processedHTML, a)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if verify {
@@ -64,27 +78,27 @@ func processAndUploadFile(inputPath, outputPath, collectionID string, verify boo
 		fmt.Scanln(&userInput)
 		if strings.ToLower(userInput) != "y" {
 			a.Print("skipping this document.")
-			return nil
+			return "", nil
 		}
-
 	}
 
-	document, err := createDocument(title, markdownContent, collectionID, a)
+	document, err := createDocument(title, markdownContent, collectionID, parentID, a)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	documentID, ok := document["id"].(string)
 	if !ok {
-		return fmt.Errorf("invalid document Id")
+		return "", fmt.Errorf("invalid document Id")
 	}
 
 	a.Logger.Printf("successfully created document: %s with Id: %s", title, documentID)
 
-	if err := os.WriteFile(outputPath, []byte(markdownContent), 0644); err != nil {
-		return err
+	outputFilePath := filepath.Join(outputPath, strings.TrimSuffix(filepath.Base(inputPath), ".html")+".md")
+	if err := os.WriteFile(outputFilePath, []byte(markdownContent), 0644); err != nil {
+		return "", err
 	}
 
 	a.Print("processed and uploaded: ", inputPath)
-	return nil
+	return documentID, nil
 }
