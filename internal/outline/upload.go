@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mmatongo/flowline/convert"
+	"github.com/mmatongo/flowline/internal/confluence"
 	"github.com/mmatongo/flowline/pkg/logger"
+	"github.com/mmatongo/flowline/utils"
 	"golang.org/x/net/html"
 )
 
@@ -29,11 +30,11 @@ func PrepareAndProcess(inputPath, outputPath, collectionID string, verify bool, 
 		return err
 	}
 
-	pages := ProcessHTML(doc)
+	pages := confluence.ProcessHTML(doc)
 	return processPages(pages, inputPath, outputPath, collectionID, verify, a, "")
 }
 
-func processPages(pages []*Page, inputPath, outputPath, collectionID string, verify bool, a *logger.App, parentID string) error {
+func processPages(pages []*confluence.Page, inputPath, outputPath, collectionID string, verify bool, a *logger.App, parentID string) error {
 	for _, page := range pages {
 		documentID, err := processAndUploadFile(page.Title, filepath.Join(inputPath, page.URL), outputPath, collectionID, verify, a, parentID)
 		if err != nil {
@@ -62,7 +63,7 @@ func processAndUploadFile(title, inputPath, outputPath, collectionID string, ver
 		return "", err
 	}
 
-	_, markdownContent, err := convert.ConvertHTMLToMarkdown(processedHTML, a)
+	_, markdownContent, err := utils.ConvertHTMLToMarkdown(processedHTML, a)
 	if err != nil {
 		return "", err
 	}
