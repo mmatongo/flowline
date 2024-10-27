@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/mmatongo/flowline/outline"
+	"github.com/mmatongo/flowline/internal/markdown"
+	"github.com/mmatongo/flowline/internal/outline"
 	"github.com/mmatongo/flowline/pkg/logger"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +32,7 @@ var outlineCmd = &cobra.Command{
 			if inputDir == "" && outputDir == "" && collectionId == "" {
 				res, err := outline.GetCollections(log)
 				if err != nil {
-					log.Logger.Error("Failed to retrieve collections: ", err)
+					log.Logger.Error("failed to retrieve collections: ", err)
 					return
 				}
 				fmt.Println(res)
@@ -44,7 +45,6 @@ var outlineCmd = &cobra.Command{
 			if err != nil {
 				log.Logger.Error("failed to print help: ", err)
 			}
-
 			return
 		}
 
@@ -53,8 +53,36 @@ var outlineCmd = &cobra.Command{
 				log.Logger.Error("failed to process confluence export ", err)
 				return
 			}
-			log.Logger.Print("processing completed successfully")
+			log.Print("processing completed successfully")
 		}
+	},
+}
+
+var markdownCmd = &cobra.Command{
+	Use:   "markdown",
+	Short: "Convert Confluence HTML export to markdown files",
+	Long: `Convert a Confluence HTML export to markdown files while preserving the document hierarchy.
+Each page will be converted to an index.md file in its own directory, maintaining the original structure
+with the attachments in a separate directory within the page directory.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		inputDir, _ := cmd.Flags().GetString("input")
+		outputDir, _ := cmd.Flags().GetString("output")
+		verify, _ := cmd.Flags().GetBool("verify")
+
+		if inputDir == "" || outputDir == "" {
+			err := cmd.Help()
+			if err != nil {
+				log.Logger.Error("failed to print help: ", err)
+			}
+			return
+		}
+
+		if err := markdown.ExportToMarkdown(inputDir, outputDir, verify, log); err != nil {
+			log.Logger.Errorf("failed to convert confluence export: %v", err)
+			return
+		}
+
+		log.Print("conversion completed successfully!")
 	},
 }
 
@@ -65,5 +93,17 @@ func init() {
 	outlineCmd.Flags().BoolP("get-collections", "G", false, "retrieve a list of all the collections")
 	outlineCmd.Flags().BoolP("verify", "r", false, "verify the contents of each page before upload")
 
+	outlineCmd.MarkFlagRequired("input")
+	outlineCmd.MarkFlagRequired("output")
+	outlineCmd.MarkFlagRequired("collection")
+
+	markdownCmd.Flags().StringP("input", "i", "", "path to the confluence HTML export")
+	markdownCmd.Flags().StringP("output", "o", "", "output path for the markdown files")
+	markdownCmd.Flags().BoolP("verify", "r", false, "verify before proceeding with conversion")
+
+	markdownCmd.MarkFlagRequired("input")
+	markdownCmd.MarkFlagRequired("output")
+
 	rootCmd.AddCommand(outlineCmd)
+	rootCmd.AddCommand(markdownCmd)
 }
