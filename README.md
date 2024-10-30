@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 </div>
 
-> <p align="center">A golang utility to help migrate your knwoledge base from one confluence</p>
+> <p align="center">A golang utility to help migrate your knwoledge base from confluence</p>
 
 ## About <a id="about"></a>
 
