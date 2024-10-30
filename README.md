@@ -151,3 +151,8 @@ Contributions are welcome! Feel free to open an issue or submit a pull request i
 ## License <a id="license"></a>
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## Known Issues <a id="known-issues"></a>
+
+- Flowline does not support all the features of Confluence. If you need a feature that is not supported, feel free to open an issue or submit a pull request.
+- Some complex tables may not be converted correctly, I've tried to fix this but it's still a work in progress.
