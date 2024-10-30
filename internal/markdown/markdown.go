@@ -105,7 +105,9 @@ func processMarkdownFile(_, inputPath, outputDir string, verify bool, a *logger.
 		}
 	}
 
-	outputPath := filepath.Join(outputDir, "index.md")
+	dirName := filepath.Base(outputDir)
+
+	outputPath := filepath.Join(outputDir, dirName+".md")
 	if err := os.WriteFile(outputPath, []byte(markdownContent), 0644); err != nil {
 		return fmt.Errorf("failed to write markdown file: %v", err)
 	}

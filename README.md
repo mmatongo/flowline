@@ -5,11 +5,11 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 </div>
 
-> <p align="center">A golang utility to help migrate your knwoledge base from one platform to another</p>
+> <p align="center">A golang utility to help migrate your knwoledge base from one confluence</p>
 
 ## About <a id="about"></a>
 
-*Flowline* is a golang utility to help migrate your knowledge base from one platform to another. It is designed to be easy to use and flexible enough to be extended to support any platform. (Hopefully)
+*Flowline* is a golang utility to help migrate your knowledge base from confluence. It is designed to be easy to use and flexible enough to be extended to support any platform. (Hopefully)
 
 ## Installation <a id="installation"></a>
 
@@ -24,11 +24,11 @@ Right now, *Flowline* only supports migrating from Confluence to Outline.
 - [x] Text content and formatting such as italic, bold, underline
 - [x] Links
 - [x] Lists, numbered lists, check lists
-- [ ] Notices (Info / error / etc) (I am working on this)
+- [ ] ~~Notices (Info / error / etc) (I am working on this)~~ (Will work on this if needed)
 - [x] Code blocks
 - [x] File attachments (kind of)
 - [x] Embedded images
-- [ ] Document nesting
+- [x] Document nesting (Document nesting is now supported for outline and markdown migrations)
 - [x] Emojis
 - [x] Simple tables
 
@@ -49,6 +49,7 @@ Usage:
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
+  markdown    Convert Confluence HTML export to markdown files
   outline     Process a confluence HTML export and import it into Outline
 
 Flags:
@@ -74,7 +75,22 @@ Flags:
   -r, --verify              verify the contents of each page before upload
 ```
 
-## Example <a id="example"></a>
+```bash
+flowline markdown
+Error: required flag(s) "input", "output" not set
+Usage:
+  flowline markdown [flags]
+
+Flags:
+  -h, --help            help for markdown
+  -i, --input string    path to the confluence HTML export
+  -o, --output string   output path for the markdown files
+  -r, --verify          verify before proceeding with conversion
+
+exit status 1
+```
+
+## Example 1 <a id="example-1"></a>
 
 Before you can use Flowline to migrate your knowledge base, you need to export your knowledge base from Confluence. You can do this by following the instructions [here](https://confluence.atlassian.com/doc/export-content-to-word-pdf-html-and-xml-139475.html) to export your knowledge base to HTML.
 
@@ -113,12 +129,20 @@ Now you can run the following command to start the migration process.
 flowline outline -i /path/to/confluence-export -o /path/to/output -c c0df2bd9-8b16-4169-b4ea-ecea5038be1d
 ```
 
+## Example 2 <a id="example-2"></a>
+
+You can also convert the confluence HTML export to markdown files.
+
+```bash
+flowline markdown -i /path/to/confluence-export -o /path/to/output
+```
+
 ## Caveats <a id="caveats"></a>
 
 - Flowline is still in its early stages and may not support all the features you need.
 - Flowline is not perfect and may not work as expected.
 - Flowline is not affiliated with any of the platforms it supports.
-- In the case of Outline, Flowline uses the Outline API to upload documents and attachments. This means that you need to have an internet connection to upload your documents. If you have a large knowledge base, this may take some time as rate limiting is enforced by Outline.
+- In the case of Outline, Flowline uses the Outline API to upload documents and attachments. This means that you need to have an internet connection to upload your documents. If you have a large knowledge base, this may take some time as rate limiting is enforced by Outline. (turns out can be byassed but would not recommend it)
 
 ## Contributing <a id="contributing"></a>
 
